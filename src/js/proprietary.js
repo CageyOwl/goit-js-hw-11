@@ -44,7 +44,7 @@ class GalleryController {
       event.preventDefault();
       const isGalleryInitiated = this.#initGallery(this.#requestNode, this.#galleryNode, this.#userKey);
       if (isGalleryInitiated) {
-        this.#scrollToNew();
+        // this.#scrollToNew();
       }
     });
 
@@ -54,7 +54,7 @@ class GalleryController {
 
   async #initGallery(requestNode, galleryNode, userKey) {
     const value = requestNode.value.trim();
-    
+
     if (!value || value === this.#currentRequest) {
       Notiflix.Notify.info('The current request is identical to the previous one.');
       return false;
