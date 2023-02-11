@@ -1,0 +1,40 @@
+#search-form {
+    display: flex;
+    justify-content: center;
+    padding: 40px;
+
+    background-color: rgb(83, 83, 255);
+}
+
+input[name="searchQuery"] {
+    padding: 10px;
+    border-top-left-radius: 10%;
+    border-bottom-left-radius: 10%;
+}
+
+#search-form button[type="submit"] {
+    display: block;
+
+    font-weight: 700;
+
+    color: #fff;
+    background-color: blueviolet;
+    border: 2px solid orange;
+    border-top-right-radius: 10%;
+    border-bottom-right-radius: 10%;
+}
+
+div.gallery {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(3, 1fr);
+    padding: 24px;
+}
+
+div.info {
+    display: flex;
+    padding: 10px;
+    justify-content: space-between;
+
+    font-size: 24px;
+}
