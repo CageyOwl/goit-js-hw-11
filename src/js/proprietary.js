@@ -1,7 +1,9 @@
 export { GalleryController };
+
 import axios from 'axios';
 import Notiflix from 'notiflix';
 import throttle from 'lodash.throttle';
+import simpleLightbox from 'simplelightbox';
 
 // The singleton class, therefore static members are optional
 class GalleryController {
@@ -17,6 +19,8 @@ class GalleryController {
   #galleryNode;
   #formNode;
 
+  #slbInstance;
+
   constructor(nodesStruct, userKey = '33496732-1283670651f4c7d1c9074e6ca') {
     if (!GalleryController._instance) {
       GalleryController._instance = this;
@@ -25,19 +29,23 @@ class GalleryController {
     }
 
     this.#userKey = userKey;
-    this.#attachEvents(nodesStruct);
+    this.#unpackData(nodesStruct);
+    this.#attachEvents();
 
     return GalleryController._instance;
   }
 
-  #attachEvents(nodesStruct) {
+  #unpackData(nodesStruct) {
     ({
       searchQuery: this.#requestNode,
       submitBtn: this.#submitNode,
       gallery: this.#galleryNode,
       searchForm: this.#formNode,
     } = nodesStruct);
+    this.#slbInstance = new simpleLightbox(`.${this.#galleryNode.classList[0]} a`);
+  }
 
+  #attachEvents() {
     this.#galleryNode.addEventListener('click', event => {
       event.preventDefault();
     });
@@ -75,6 +83,7 @@ class GalleryController {
     Notiflix.Notify.success(`Hooray! We found ${data.total} images.`);
     this.#maxPage = Math.ceil(data.total / this.#perPage);
     galleryNode.innerHTML = this.#renderGalleryPage(data.hits);
+    this.#slbInstance.refresh();
 
     setTimeout(() => {
       window.scroll({
@@ -146,8 +155,7 @@ class GalleryController {
     ++this.#currentPage;
     const data = await this.#fetchImgsData(this.#currentRequest, this.#userKey, this.#currentPage);
     this.#galleryNode.insertAdjacentHTML('beforeend', this.#renderGalleryPage(data.hits));
-
-    console.log(`${this.#currentPage}th of ${this.#maxPage} pages.`);
+    this.#slbInstance.refresh();
   }
 
   set userKey(value) {
