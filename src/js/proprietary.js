@@ -5,14 +5,12 @@ import throttle from 'lodash.throttle';
 
 // The singleton class, therefore static members are optional
 class GalleryController {
-  #userKey; // It has a setter
-
+  #userKey;                                // It has a setter
   #currentRequest = '';
-  #currentPage = 1;
-  #maxPage = 0
 
-  #perPage = 20; // It has a setter
-  // #cardHeight;
+  #currentPage = 1;
+  #maxPage = 0;
+  #perPage = 20;                           // It has a setter
 
   #requestNode;
   #submitNode;
@@ -40,24 +38,28 @@ class GalleryController {
       searchForm: this.#formNode,
     } = nodesStruct);
 
-    this.#submitNode.addEventListener('click', event => {
+    this.#galleryNode.addEventListener('click', event => {
       event.preventDefault();
-      const isGalleryInitiated = this.#initGallery(this.#requestNode, this.#galleryNode, this.#userKey);
-      if (isGalleryInitiated) {
-        // this.#scrollToNew();
-      }
     });
 
-    // todo
-    // window.addEventListener('scroll', /* todo */);
+    this.#submitNode.addEventListener('click', event => {
+      event.preventDefault();
+      this.#initGallery(this.#requestNode, this.#galleryNode, this.#userKey);
+    });
+
+    window.addEventListener('scroll', throttle(() => {
+      this.#continueGallery(this.#galleryNode, this.#userKey);
+    }, 300));
   }
 
   async #initGallery(requestNode, galleryNode, userKey) {
     const value = requestNode.value.trim();
 
     if (!value || value === this.#currentRequest) {
-      Notiflix.Notify.info('The current request is identical to the previous one.');
-      return false;
+      Notiflix.Notify.info(
+        'The current request is identical to the previous one.'
+      );
+      return;
     }
 
     this.#currentRequest = value;
@@ -67,19 +69,20 @@ class GalleryController {
       Notiflix.Notify.failure(
         'Sorry, there are no images matching your search query. Please try again.'
       );
-      return false;
+      return;
     }
 
     Notiflix.Notify.success(`Hooray! We found ${data.total} images.`);
     this.#maxPage = Math.ceil(data.total / this.#perPage);
-    galleryNode.innerHTML = this.#renderPage(data.hits);
-    return true;
+    galleryNode.innerHTML = this.#renderGalleryPage(data.hits);
 
-    // ( { height: this.#cardHeight } = this.#galleryNode.firstElementChild.getBoundingClientRect() );
-    // window.scrollBy({
-    //   top: this.#cardHeight * 2,
-    //   behavior: "smooth",
-    // }); 
+    setTimeout(() => {
+      window.scroll({
+        top: this.#calcScrollY({ form: this.#formNode }),
+        behavior: 'smooth',
+      });
+    }, 500);
+    return;
   }
 
   async #fetchImgsData(userRequest, userKey, pageNum = 1) {
@@ -95,9 +98,11 @@ class GalleryController {
     }
   }
 
-  #renderPage(dataArr) {
+  #renderGalleryPage(dataArr) {
     return dataArr.reduce((output, data) => {
-      return output += `
+      return (output += `
+        <a href="${data.largeImageURL}">
+
         <div class="photo-card">
           <img src="${data.webformatURL}" alt="${data.tags}" loading="lazy" />
           <div class="info">
@@ -119,19 +124,31 @@ class GalleryController {
             </p>
           </div>
         </div>
-      `;
+
+        </a>
+      `);
     }, '');
   }
 
-  // async #continueGallery() {
-  //   if (this.#currentPage === this.#maxPage || window.innerHeight + window.scrollY < document.body.offsetHeight) {
-  //     return;
-  //   }
+  #calcScrollY(geomNodesStruct) {
+    let totalHeight = 0;
+    for (let node in geomNodesStruct) {
+      totalHeight += geomNodesStruct[node].getBoundingClientRect().height;
+    }
+    return totalHeight;
+  }
 
-  //   ++this.#currentPage;
-  //   const data = await this.#fetchImgsData(this.#currentRequest, this.#userKey, this.#currentPage);
-  //   this.#galleryNode.insertAdjacentHTML('beforeend', this.#renderPage(data.hits));
-  // }
+  async #continueGallery(galleryNode, userKey) {
+    if (this.#currentPage === this.#maxPage || window.innerHeight + window.scrollY < document.body.offsetHeight) {
+      return;
+    }
+
+    ++this.#currentPage;
+    const data = await this.#fetchImgsData(this.#currentRequest, this.#userKey, this.#currentPage);
+    this.#galleryNode.insertAdjacentHTML('beforeend', this.#renderGalleryPage(data.hits));
+
+    console.log(`${this.#currentPage}th of ${this.#maxPage} pages.`);
+  }
 
   set userKey(value) {
     this.#userKey = value;
