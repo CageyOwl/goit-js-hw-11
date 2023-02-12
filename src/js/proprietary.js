@@ -7,12 +7,12 @@ import simpleLightbox from 'simplelightbox';
 
 // The singleton class, therefore static members are optional
 class GalleryController {
-  #userKey;                                // It has a setter
+  #userKey; // It has a setter
   #currentRequest = '';
 
   #currentPage = 1;
   #maxPage = 0;
-  #perPage = 20;                           // It has a setter
+  #perPage = 20; // It has a setter
 
   #requestNode;
   #submitNode;
@@ -42,7 +42,9 @@ class GalleryController {
       gallery: this.#galleryNode,
       searchForm: this.#formNode,
     } = nodesStruct);
-    this.#slbInstance = new simpleLightbox(`.${this.#galleryNode.classList[0]} a`);
+    this.#slbInstance = new simpleLightbox(
+      `.${this.#galleryNode.classList[0]} a`
+    );
   }
 
   #attachEvents() {
@@ -55,9 +57,12 @@ class GalleryController {
       this.#initGallery(this.#requestNode, this.#galleryNode, this.#userKey);
     });
 
-    window.addEventListener('scroll', throttle(() => {
-      this.#continueGallery(this.#galleryNode, this.#userKey);
-    }, 300));
+    window.addEventListener(
+      'scroll',
+      throttle(() => {
+        this.#continueGallery(this.#galleryNode, this.#userKey);
+      }, 300)
+    );
   }
 
   async #initGallery(requestNode, galleryNode, userKey) {
@@ -81,7 +86,7 @@ class GalleryController {
     }
 
     Notiflix.Notify.success(`Hooray! We found ${data.total} images.`);
-    this.#maxPage = Math.ceil(data.total / this.#perPage);
+    this.#maxPage = Math.ceil(data.totalHits / this.#perPage);
     galleryNode.innerHTML = this.#renderGalleryPage(data.hits);
     this.#slbInstance.refresh();
 
@@ -148,13 +153,26 @@ class GalleryController {
   }
 
   async #continueGallery(galleryNode, userKey) {
-    if (this.#currentPage === this.#maxPage || window.innerHeight + window.scrollY < document.body.offsetHeight) {
+    if (window.innerHeight + window.scrollY < document.body.offsetHeight) {
+      return;
+    }
+    if (this.#currentPage === this.#maxPage) {
+      Notiflix.Notify.info(
+        "We're sorry, but you've reached the end of search results."
+      );
       return;
     }
 
     ++this.#currentPage;
-    const data = await this.#fetchImgsData(this.#currentRequest, this.#userKey, this.#currentPage);
-    this.#galleryNode.insertAdjacentHTML('beforeend', this.#renderGalleryPage(data.hits));
+    const data = await this.#fetchImgsData(
+      this.#currentRequest,
+      this.#userKey,
+      this.#currentPage
+    );
+    this.#galleryNode.insertAdjacentHTML(
+      'beforeend',
+      this.#renderGalleryPage(data.hits)
+    );
     this.#slbInstance.refresh();
   }
 
