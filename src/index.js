@@ -1,7 +1,6 @@
 import 'modern-normalize/modern-normalize.css';
 import 'notiflix/dist/notiflix-3.2.6.min.css';
 import 'simplelightbox/dist/simple-lightbox.min.css';
-import './css/styles.css';
 
 import { GalleryController } from "./js/proprietary";
 

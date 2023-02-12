@@ -115,26 +115,22 @@ class GalleryController {
   #renderGalleryPage(dataArr) {
     return dataArr.reduce((output, data) => {
       return (output += `
-        <a href="${data.largeImageURL}">
+        <a class="lightbox-link" href="${data.largeImageURL}">
 
         <div class="photo-card">
           <img src="${data.webformatURL}" alt="${data.tags}" loading="lazy" />
           <div class="info">
             <p class="info-item">
-              <b>Likes</b>
-              <p>${data.likes}</p>
+              <b>Likes</b>${data.likes}
             </p>
             <p class="info-item">
-              <b>Views</b>
-              <p>${data.views}</p>
+              <b>Views</b>${data.views}
             </p>
             <p class="info-item">
-              <b>Comments</b>
-              <p>${data.comments}</p>
+              <b>Comments</b>${data.comments}
             </p>
             <p class="info-item">
-              <b>Downloads</b>
-              <p>${data.downloads}</p>
+              <b>Downloads</b>${data.downloads}
             </p>
           </div>
         </div>
