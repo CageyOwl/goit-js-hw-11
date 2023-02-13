@@ -8,7 +8,7 @@ import simpleLightbox from 'simplelightbox';
 // The singleton class, therefore static members are optional
 class GalleryController {
   #userKey; // It has a setter
-  #currentRequest = '';
+  #currentRequest = 'Good request';
 
   #currentPage = 1;
   #maxPage = 0;
@@ -68,17 +68,25 @@ class GalleryController {
   async #initGallery(requestNode, galleryNode, userKey) {
     const value = requestNode.value.trim();
 
-    if (!value || value === this.#currentRequest) {
+    if (!value) {
+      Notiflix.Notify.info(
+        'No query has been entered. Please, tell us what you want to see.'
+      );
+      return;
+    }
+    if (value === this.#currentRequest) {
       Notiflix.Notify.info(
         'The current request is identical to the previous one.'
       );
       return;
     }
 
+    this.#currentPage = 1;
     this.#currentRequest = value;
     const data = await this.#fetchImgsData(value, userKey);
 
     if (!data.total) {
+      this.#galleryNode.innerHTML = '';
       Notiflix.Notify.failure(
         'Sorry, there are no images matching your search query. Please try again.'
       );
@@ -149,7 +157,7 @@ class GalleryController {
   }
 
   async #continueGallery(galleryNode, userKey) {
-    if (window.innerHeight + window.scrollY < document.body.offsetHeight) {
+    if (window.innerHeight + window.scrollY < document.body.offsetHeight - 1) {
       return;
     }
     if (this.#currentPage === this.#maxPage) {
